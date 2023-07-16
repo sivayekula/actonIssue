@@ -4,6 +4,7 @@ const { loginValiator, signupValiator } = require('../config/util');
 const { login, signup, verifyToken } = require('../controllers/users');
 const router= express.Router();
 
+
 router.use(express.json())
 
 

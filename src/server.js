@@ -9,6 +9,8 @@ const userRouter = require('./routers/users');
 const flagRouter = require('./routers/flag');
 const commentRouter = require('./routers/comments');
 const issueRouter = require('./routers/issues');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 //Express methods
 app.use(express.urlencoded({extended: false}))
@@ -20,7 +22,7 @@ app.use((req, res, next)=> {
     res.header("Access-Control-Allow-Headers", "*");
     next()
 })
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // routes
 app.use('/', indexRouter);
 app.use('/user', userRouter);

@@ -1,0 +1,67 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "ActOnIssue",
+      "description": "Documentation For Act On Issue",
+      "version": "1.0.11"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000/api"
+      }
+    ],
+    "tags": [
+      {
+        "name": "user",
+        "description": "Operations about user"
+      }
+    ],
+    "paths": {
+      "/user/signup": {
+        "post": {
+          "summary": "Create user",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "User": {
+          "type": "object",
+          "required": [
+            "name",
+            "email/mobile"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email/mobile": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "securitySchemes": {
+        "api_key": {
+          "type": "apiKey",
+          "name": "api_key",
+          "in": "header"
+        }
+      }
+    }
+}
