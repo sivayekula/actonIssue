@@ -1,6 +1,6 @@
 const express = require('express');
 const app = new express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 const cors = require('cors');
 const indexRouter = require('./routers/index');
 const db = require('./db');
@@ -9,27 +9,28 @@ const userRouter = require('./routers/users');
 const flagRouter = require('./routers/flag');
 const commentRouter = require('./routers/comments');
 const issueRouter = require('./routers/issues');
+const newsRouter = require("./routers/news");
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 
 //Express methods
-app.use(express.urlencoded({extended: false}))
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 
 // cors
 app.use(cors())
-app.use((req, res, next)=> {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "*");
-    next()
-})
+
+// api documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 // routes
 app.use('/', indexRouter);
-app.use('/user', userRouter);
-app.use('/category', categoryRouter);
-app.use('/issue', issueRouter);
+app.use('/api/user', userRouter);
+app.use('/api/category', categoryRouter);
+app.use('/api/issue', issueRouter);
 app.use('/comment', commentRouter);
 app.use('/flag', flagRouter);
+app.use("/api/trandingNews", newsRouter)
 
 
 app.listen(port, ()=> {

@@ -1,9 +1,18 @@
 "use strict";
 const User= require("../schemas/user");
 
-const getUser= async (identifier)=> {
+const userLogin= async (identifier)=> {
     try{
-        let user= await User.findOne({$or:[{_id: identifier}, {email: identifier}, {mobile: identifier}]})
+        let user= await User.findOne({$or:[{email: identifier}, {mobile: identifier}]})
+        return user;
+    }catch(err) {
+        throw err
+    }
+}
+
+const getUser= async (userId)=> {
+    try{
+        let user= await User.findOne({_id: userId})
         return user;
     }catch(err) {
         throw err
@@ -22,5 +31,6 @@ const createUser= async (requestBody)=> {
 
 module.exports= {
     getUser: getUser,
-    createUser: createUser
+    createUser: createUser,
+    userLogin: userLogin
 }

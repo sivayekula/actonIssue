@@ -12,7 +12,7 @@ const UserSchema= new mongoose.Schema({
     createIndexes: { unique: true }
   },
   mobile: {
-    type: Number,
+    type: String,
     required: function() { return this.email === ''; },
     createIndexes: { unique: true }
   },

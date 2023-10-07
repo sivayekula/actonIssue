@@ -1,7 +1,6 @@
 "use strict";
 const mongoose= require("mongoose");
 const uniqid= require("uniqid");
-console.log(uniqid(123456789))
 const IssueSchema= new mongoose.Schema({
   title: {
     type: String,
@@ -17,10 +16,24 @@ const IssueSchema= new mongoose.Schema({
     type: String
   },
   images: {
+    type: Array,
+    required: true
+  },
+  address: {
+    type: Object,
+    required: true
+  },
+  landmark: {
     type: String
   },
-  location: {
+  city: {
     type: String
+  },
+  state: {
+    type: String
+  },
+  pincode: {
+    type: Number
   },
   status: {
     type: String,
