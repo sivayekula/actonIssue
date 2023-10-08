@@ -43,7 +43,7 @@ const createissue= async (req, res)=> {
             let imageType= /\/(.*?)$/;
             let imageExt= type.match(imageType);
             let name= Date.now()+"."+imageExt[1];
-            let imgPath= "../uploads/"+name
+            let imgPath= "../uploads/issues/"+name
             imgs.push(name)
             await saveImage(data, imgPath)
         }

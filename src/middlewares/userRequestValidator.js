@@ -6,7 +6,7 @@ const loginSchema = [
         [body('loginId').matches(/^\d{10}$/), body('loginId').isEmail().normalizeEmail()],
         {message: "Valid email or phoneNumber is required"}
     ),
-    check("password").isLength({min: 6, max: 10}).withMessage("Password must be graterthen 6 and lessthen 10")   
+    check("password").isLength({min: 6, max: 10}).withMessage("Password must be graterthen 6 and lessthen 10")  
 ];
 
 const signupSchema = [
@@ -14,7 +14,8 @@ const signupSchema = [
         [check('loginId').matches(/^\d{10}$/), check('loginId').isEmail().normalizeEmail()],
         {message: "Valid email or phoneNumber is required"}
     ),
-    check("name").isAlphanumeric().isLength({min: 3, max: 20}).withMessage("Name must be graterthen 3 and lessthen 20")
+    check("name").isAlphanumeric().isLength({min: 3, max: 20}).withMessage("Name must be graterthen 3 and lessthen 20"),
+    check("password").isLength({min: 6, max: 10}).withMessage("Password must be graterthen 6 and lessthen 10")
 ];
 
 const verifyOTPSchema = [

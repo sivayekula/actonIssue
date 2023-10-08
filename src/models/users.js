@@ -28,9 +28,19 @@ const createUser= async (requestBody)=> {
     }
 }
 
+const updateUserDetails= async (userObj, userId) => {
+    try{
+       let user= await User.findByIdAndUpdate(userId, userObj)
+       return user
+    }catch(err){
+        throw err
+    }
+}
+
 
 module.exports= {
     getUser: getUser,
     createUser: createUser,
-    userLogin: userLogin
+    userLogin: userLogin,
+    updateUserDetails: updateUserDetails
 }

@@ -2,22 +2,26 @@ const config = require('../config/config')
 const jwt= require("jsonwebtoken")
 
 const issueToken = (data) => {
-    let token = jwt.sign(data, config.JWT_SECRET, { expiresIn: '1h' })
-    return token;
+    try {
+        let token = jwt.sign(data, config.JWT_SECRET)
+        return token;
+    }catch(err) {
+        throw err
+    }
 }
 
-const verifyToken = async (req, res, next) => {
-    let token = req.headers.authorization.replace(/^Bearer\s+/, "");
-    if(token) {
-        try {
-            let decoded = await jwt.verify(token, config.JWT_SECRET)
+const verifyToken = (req, res, next) => {
+    try {
+        let token = req.headers.authorization.replace(/^Bearer\s+/, "");
+        if(token) {
+            let decoded = jwt.verify(token, config.JWT_SECRET)
             req.user = decoded
             next()
-        } catch(error) {
-            res.status(401).json({success: false, message: "Provided Authorization token is expired / Invalid"})
+        }else {
+            res.status(401).json({success: false, message: "This endpoint required valid Authorization token"})
         }
-    }else {
-        res.status(401).json({success: false, message: "This endpoint required valid Authorization token"})
+    } catch(error) {
+        res.status(401).json({success: false, message: "Provided Authorization token is expired / Invalid"})
     }
 }
 

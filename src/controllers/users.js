@@ -1,9 +1,11 @@
 "use strict";
 const NodeCache= require( "node-cache" );
 const myCache= new NodeCache( { stdTTL: 100, checkperiod: 120 } );
-const { getUser, createUser, userLogin }= require("../models/users");
+const { getUser, createUser, userLogin, updateUserDetails }= require("../models/users");
 const validator = require('validator');
 const { issueToken } = require("../middlewares/tokenValidator");
+const bcrypt = require('bcrypt');
+const imagePath= "../uploads/users/";
 
 const signup= async (req, res)=> {
     try{
@@ -14,9 +16,9 @@ const signup= async (req, res)=> {
             let isEmail= await validator.isEmail(req.body.loginId)
             let userObj;
             if(isEmail) {
-                userObj= {name: req.body.name, email: req.body.loginId}
+                userObj= {name: req.body.name, email: req.body.loginId, password: req.body.password}
             } else {
-                userObj= {name: req.body.name, mobile: req.body.loginId}
+                userObj= {name: req.body.name, mobile: req.body.loginId, password: req.body.password}
             }
             user = await createUser(userObj)
             let token= await genarateOTP()
@@ -32,9 +34,13 @@ const login= async (req, res)=> {
     try{
         let user= await userLogin(req.body.loginId)
         if(user) {
-            let token= await genarateOTP()
-            await sendOtp(token, user._id, req.body.loginId, await validator.isEmail(req.body.loginId))
-            res.status(200).json({success: true, message: "OTP sent to your registered email", data: {userId: user._id}})
+            let isMatch= await bcrypt.compare(req.body.password, user.password)
+            if(isMatch) {
+                let token= issueToken({userId: user._id, role: user.role, name: user.name})
+                res.status(200).json({success: true, message: "Logged in successfully", data: token})
+            } else {
+                res.status(400).json({success: false, message: "Provided user name or password is wrong"})
+            }
         } else {
             res.status(400).json({success: false, message: "Sorry!, We are unable to find your details."})
         }
@@ -102,6 +108,37 @@ const getuser= async (req, res)=> {
     }
 }
 
+const updateUser= async (req, res)=> {
+    try{
+        let user= await getUser(req.user.userId);
+        let userObj= {}
+        if(user) {
+            if(req.body.name) {
+                userObj['name']= req.body.name
+            }
+            if(req.body.profile_pic) {
+                let imgName= await saveImage(req.body.profile_pic);
+                userObj['profile_pic']= imgName
+            }
+            if(req.body.gender) {
+                userObj['gender']= req.body.gender
+            }
+            if(req.body.address) {
+                userObj['address']= req.body.address
+            }
+            if(req.body.identity_proof) {
+                let proImg= await saveImage(req.body.identity_proof);
+                userObj['identity_proof'] = proImg
+            }
+            let updatedUser= await updateUserDetails(userObj, user._id)
+            res.status(200).json({success: true, message: "profile pic updated successfully", data: updatedUser})
+        } else{
+            res.status(400).json({success: false, message: "Unable to find user details"})
+        }
+    }catch(err){
+        res.status(400).json({success: false, message: err.message})
+    }
+}
 const genarateOTP= async ()=>{
     try{
         let otp= Math.floor(1000 + Math.random() * 9000);
@@ -145,10 +182,28 @@ const sendOtp= async (otp, userId, notificationSource, isEmail)=> {
 
 }
 
+const saveImage= async (imageString) => {
+    try{
+        let matches = imageString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);  
+        if (matches.length !== 3) throw new Error('Invalid image string');
+        let type = matches[1];
+        let data = Buffer.from(matches[2], 'base64');
+        let imageType= /\/(.*?)$/;
+        let imageExt= type.match(imageType);
+        let name= Date.now()+"."+imageExt[1];
+        let imgPath= imagePath+""+name
+        await fs.promises.writeFile(path.join(__dirname, imgPath), data);
+        return name
+    }catch(err){
+        throw err
+    }
+}
+
 module.exports= {
     login: login,
     signup: signup,
     verifyOTP: verifyOTP,
     resendOTP: resendOTP,
-    getuser: getuser
+    getuser: getuser,
+    updateUser: updateUser
 }
