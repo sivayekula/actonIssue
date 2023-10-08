@@ -2,6 +2,7 @@
 const fs= require("fs")
 const path= require("path")
 const { getIssues, saveIssue } = require("../models/issues")
+const uniqid= require("uniqid");
 
 const getissue= async (req, res)=> {
     try{
@@ -28,8 +29,8 @@ const issuesList= async (req, res)=> {
 
 const createissue= async (req, res)=> {
     try{
-        let address= JSON.parse(req.body.address)
-        let images= ["data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII="]
+        let address= req.body.address
+        let images= req.body.images
         let imgs=[]
         for(let i= 0; i< images.length; i++){
             let matches = images[i].match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);  
@@ -46,7 +47,7 @@ const createissue= async (req, res)=> {
             imgs.push(name)
             await saveImage(data, imgPath)
         }
-        let isuObj= {title: req.body.title, description: req.body.description, images: imgs, address: address, categoryId: req.body.category, userId: req.user.userId}
+        let isuObj= {hashId:uniqid.process("#") ,title: req.body.title, description: req.body.description, images: imgs, address: address, categoryId: req.body.category, userId: req.user.userId}
         let issue= await saveIssue(isuObj)
         res.status(200).json({sucess: true, message: "Issue created successfully", data: issue})
     }catch(err) {

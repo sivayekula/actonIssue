@@ -5,7 +5,8 @@ const loginSchema = [
     oneOf(
         [body('loginId').matches(/^\d{10}$/), body('loginId').isEmail().normalizeEmail()],
         {message: "Valid email or phoneNumber is required"}
-    )      
+    ),
+    check("password").isLength({min: 6, max: 10}).withMessage("Password must be graterthen 6 and lessthen 10")   
 ];
 
 const signupSchema = [

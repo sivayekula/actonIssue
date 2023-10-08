@@ -1,6 +1,5 @@
 "use strict";
 const mongoose= require("mongoose");
-const uniqid= require("uniqid");
 const IssueSchema= new mongoose.Schema({
   title: {
     type: String,
@@ -9,15 +8,14 @@ const IssueSchema= new mongoose.Schema({
   hashId: {
     type: String,
     required: true,
-    unique: true,
-    default: "#"+uniqid.time()
+    unique: true
   },
   description: {
     type: String
   },
   images: {
     type: Array,
-    required: true
+    required: false
   },
   address: {
     type: Object,
