@@ -14,8 +14,8 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 
 //Express methods
-app.use(express.json())
-app.use(express.urlencoded({extended: true}))
+app.use(express.json({limit:"10mb"}))
+app.use(express.urlencoded({extended: true,limit:"10mb"}))
 
 // cors
 app.use(cors())
@@ -31,7 +31,7 @@ app.use('/api/issue', issueRouter);
 app.use('/comment', commentRouter);
 app.use('/flag', flagRouter);
 app.use("/api/trandingNews", newsRouter)
-
+app.use(express.static(__dirname + '/uploads'))
 
 app.listen(port, ()=> {
     console.log(`server is running on :: ${port}`)

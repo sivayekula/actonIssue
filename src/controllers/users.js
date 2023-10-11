@@ -3,6 +3,8 @@ const NodeCache= require( "node-cache" );
 const myCache= new NodeCache( { stdTTL: 100, checkperiod: 120 } );
 const { getUser, createUser, userLogin, updateUserDetails }= require("../models/users");
 const validator = require('validator');
+const fs = require('fs')
+const path = require('path')
 const { issueToken } = require("../middlewares/tokenValidator");
 const bcrypt = require('bcrypt');
 const imagePath= "../uploads/users/";
@@ -93,8 +95,8 @@ const resendOTP= async (req, res)=> {
 
 const getuser= async (req, res)=> {
     try{
-        if(req.params.userId){
-            let user= await getUser(req.params.userId);
+        if(req.user.userId){
+            let user= await getUser(req.user.userId);
             if(user){
                 res.status(200).json({success: true, message: "user details", data: user})
             } else {
