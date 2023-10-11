@@ -58,7 +58,8 @@ const verifyOTP= async (req, res)=> {
             let otp= await getCache(user._id);
             if(otp) {
                 if(otp*1 == req.body.token*1){
-                    await updateUserDetails({is_verified: true}, req.body.userId)
+                    user.is_verified= true
+                    await updateUserDetails(user, req.body.userId)
                     let token= issueToken({userId: user._id, role: user.role, name: user.name})
                     res.status(200).json({success: true, message: "Logged in successfully", data: token})
                 } else {
