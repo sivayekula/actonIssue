@@ -12,7 +12,7 @@ const imagePath= "../uploads/users/";
 const signup= async (req, res)=> {
     try{
         let user= await userLogin(req.body.loginId);
-        if(user) {
+        if(user && user.is_verified) {
             res.status(400).json({success: false, message: "User already existed with this email or mobile number"})
         } else {
             let isEmail= await validator.isEmail(req.body.loginId)
@@ -25,7 +25,7 @@ const signup= async (req, res)=> {
             user = await createUser(userObj)
             let token= await genarateOTP()
             await sendOtp(token, user._id, req.body.loginId, isEmail)
-            res.status(200).json({success: true, message: "User created successfully", data: {userId: user._id}})
+            res.status(200).json({success: true, message: `Otp sent to ${req.body.loginId} successfully`, data: {userId: user._id}})
         }
     }catch(err) {
         res.status(400).json({success: false, message: err.message})
@@ -35,7 +35,7 @@ const signup= async (req, res)=> {
 const login= async (req, res)=> {
     try{
         let user= await userLogin(req.body.loginId)
-        if(user) {
+        if(user && user.is_verified) {
             let isMatch= await bcrypt.compare(req.body.password, user.password)
             if(isMatch) {
                 let token= issueToken({userId: user._id, role: user.role, name: user.name})
@@ -44,7 +44,7 @@ const login= async (req, res)=> {
                 res.status(400).json({success: false, message: "Provided user name or password is wrong"})
             }
         } else {
-            res.status(400).json({success: false, message: "Sorry!, We are unable to find your details."})
+            res.status(400).json({success: false, message: "Please signup or verify your details"})
         }
     }catch(err) {
         res.status(400).json({success: false, message: err.message})

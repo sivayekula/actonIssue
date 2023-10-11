@@ -44,6 +44,10 @@ const UserSchema= new mongoose.Schema({
   meta_info: {
     type: String
   },
+  is_verified: {
+    type: Boolean,
+    default: false
+  },
   status: {
     type: String,
     default: "active"
