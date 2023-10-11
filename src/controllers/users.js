@@ -60,7 +60,8 @@ const verifyOTP= async (req, res)=> {
                 if(otp*1 == req.body.token*1){
                     let userObj= {}
                     userObj['is_verified']= true
-                    await updateUserDetails(userObj, req.body.userId)
+                    let usr= await updateUserDetails(userObj, user._id)
+                    console.log(usr)
                     let token= issueToken({userId: user._id, role: user.role, name: user.name})
                     res.status(200).json({success: true, message: "Logged in successfully", data: token})
                 } else {
@@ -74,24 +75,6 @@ const verifyOTP= async (req, res)=> {
             res.status(400).json({success: false, message: "Sorry!, We are unable to find your details."})
         }
     }catch(err) {
-        res.status(400).json({success: false, message: err.message})
-    }
-}
-
-const resendOTP= async (req, res)=> {
-    try{
-        let user= await getUser(req.body.userId);
-        if(user){
-            let token= getCache(user._id);
-            if(!token) {
-                token= genarateOTP()
-            }
-            sendOtp(token, user._id, user.email, true)
-            res.status(200).json({success: true, message: "OTP sent successfully"})
-        } else {
-            res.status(400).json({success: false, message: "We are unable to find your details"})
-        }
-    }catch(err){
         res.status(400).json({success: false, message: err.message})
     }
 }

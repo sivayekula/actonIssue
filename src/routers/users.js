@@ -13,7 +13,6 @@ router.use(express.json())
 router.post("/signup", signupSchema, requestValiator, signup);
 router.post("/login", loginSchema, requestValiator, login);
 router.post("/verifyOTP", verifyOTPSchema, requestValiator, verifyOTP)
-router.post("/resendOTP", resendOTPSchema, requestValiator, resendOTP)
 router.get('/getUser', verifyToken, getuser);
 router.post("/update", verifyToken, updateUser);
 module.exports = router
