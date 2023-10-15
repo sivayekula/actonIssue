@@ -71,9 +71,34 @@
         }
       }
     },
+    "/category/createCategory": {
+      "post": {
+        "summary": "Category Creation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/category"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/issue/createIssue": {
       "post": {
         "summary": "create issue",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -135,6 +160,17 @@
           }
         }
       },
+      "category": {
+        "type": "object",
+        "required": [
+          "categoryName"
+        ],
+        "properties": {
+          "categoryName": {
+            "type": "string"
+          }
+        }
+      },
       "createIssue": {
         "type": "object",
         "required": [
@@ -168,10 +204,9 @@
       }
     },
     "securitySchemes": {
-      "api_key": {
-        "type": "apiKey",
-        "name": "api_key",
-        "in": "header"
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }
