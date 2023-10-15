@@ -13,6 +13,7 @@ const issueToken = (data) => {
 const verifyToken = (req, res, next) => {
     try {
         let token = req.headers.authorization.replace(/^Bearer\s+/, "");
+        console.log("token", token)
         if(token) {
             let decoded = jwt.verify(token, config.JWT_SECRET)
             req.user = decoded

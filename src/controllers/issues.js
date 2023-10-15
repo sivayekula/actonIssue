@@ -6,7 +6,7 @@ const uniqid= require("uniqid");
 
 const getissue= async (req, res)=> {
     try{
-        let isuId= req.body.issueId;
+        let isuId= req.params.issueId;
         if(isuId) {
             let issue= await getIssues(isuId)
             res.status(200).json({sucess: true, message: "Issue details", data: issue})
@@ -20,7 +20,8 @@ const getissue= async (req, res)=> {
 
 const issuesList= async (req, res)=> {
     try{
-        let issue= await getIssues(isuId)
+        let filter= {}
+        let issue= await getIssues(filter)
         res.status(200).json({sucess: true, message: "List of issues", data: issue})
     }catch(err) {
         res.status(400).json({sucess: false, message: err.message})

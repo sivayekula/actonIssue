@@ -12,7 +12,7 @@ const userLogin= async (identifier)=> {
 
 const getUser= async (userId)=> {
     try{
-        let user= await User.findOne({_id: userId})
+        let user= await User.findOne({_id: userId}).select("-password")
         return user;
     }catch(err) {
         throw err

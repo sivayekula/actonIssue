@@ -17,12 +17,14 @@ const signup= async (req, res)=> {
         } else {
             let isEmail= await validator.isEmail(req.body.loginId)
             let userObj;
-            if(isEmail) {
-                userObj= {name: req.body.name, email: req.body.loginId, password: req.body.password}
-            } else {
-                userObj= {name: req.body.name, mobile: req.body.loginId, password: req.body.password}
+            if(!user){
+                if(isEmail) {
+                    userObj= {name: req.body.name, email: req.body.loginId, password: req.body.password}
+                } else {
+                    userObj= {name: req.body.name, mobile: req.body.loginId, password: req.body.password}
+                }
+                user = await createUser(userObj)
             }
-            user = await createUser(userObj)
             let token= await genarateOTP()
             await sendOtp(token, user._id, req.body.loginId, isEmail)
             res.status(200).json({success: true, message: `Otp sent to ${req.body.loginId} successfully`, data: {userId: user._id}})
@@ -58,10 +60,7 @@ const verifyOTP= async (req, res)=> {
             let otp= await getCache(user._id);
             if(otp) {
                 if(otp*1 == req.body.token*1){
-                    let userObj= {}
-                    userObj['is_verified']= true
-                    let usr= await updateUserDetails(userObj, user._id)
-                    console.log(usr)
+                    await updateUserDetails({is_verified: true}, user._id)
                     let token= issueToken({userId: user._id, role: user.role, name: user.name})
                     res.status(200).json({success: true, message: "Logged in successfully", data: token})
                 } else {
@@ -191,7 +190,6 @@ module.exports= {
     login: login,
     signup: signup,
     verifyOTP: verifyOTP,
-    resendOTP: resendOTP,
     getuser: getuser,
     updateUser: updateUser
 }
