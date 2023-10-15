@@ -1,14 +1,14 @@
 "use strict";
 const fs= require("fs")
 const path= require("path")
-const { getIssues, saveIssue } = require("../models/issues")
+const { getIssues, saveIssue, getIssue } = require("../models/issues")
 const uniqid= require("uniqid");
 
 const getissue= async (req, res)=> {
     try{
         let isuId= req.params.issueId;
         if(isuId) {
-            let issue= await getIssues(isuId)
+            let issue= await getIssue(isuId)
             res.status(200).json({sucess: true, message: "Issue details", data: issue})
         }else {
             res.status(400).json({sucess: false, message: "Issue id is required"})
@@ -20,7 +20,7 @@ const getissue= async (req, res)=> {
 
 const issuesList= async (req, res)=> {
     try{
-        let filter= {}
+        let filter= {isActive: true}
         let issue= await getIssues(filter)
         res.status(200).json({sucess: true, message: "List of issues", data: issue})
     }catch(err) {
@@ -48,7 +48,7 @@ const createissue= async (req, res)=> {
             imgs.push(name)
             await saveImage(data, imgPath)
         }
-        let isuObj= {hashId:uniqid.process("#") ,title: req.body.title, description: req.body.description, images: imgs, address: address, categoryId: req.body.category, userId: req.user.userId}
+        let isuObj= {hashId:uniqid.process("#"), title: req.body.title, description: req.body.description, images: imgs, address: address, categoryId: req.body.category, userId: req.user.userId}
         let issue= await saveIssue(isuObj)
         res.status(200).json({sucess: true, message: "Issue created successfully", data: issue})
     }catch(err) {

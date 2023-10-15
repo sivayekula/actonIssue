@@ -46,6 +46,10 @@ const IssueSchema= new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: "category"
+  },
+  isActive: {
+    type: Boolean,
+    default: false
   }
 },{
     timestamps: {

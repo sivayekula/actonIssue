@@ -1,13 +1,17 @@
 const Issue= require("../schemas/issue");
+const config= require("../config");
 
 
-const getIssues= async (issueFilter)=> {
-    try{
-        let issues= await Issue.find(issueFilter)
-        return issues
-    }catch(err) {
+const getIssues= async (issueFilter, currentpage)=> {
+    Issue.find({issueFilter}).count().then(count=>{
+        Issue.aggregate().skip(currentpage).limit(config.ISSEUS_PER_PAGE).sort(-1).exec().then(documents=>{
+            return {docs: documents, totalCount: count}
+        })
+    }).catch((error) => {
+        throw error
+    }).catch(err=> {
         throw err
-    }
+    })
 }
 const getIssue= async (isuId)=> {
     try{
@@ -29,5 +33,6 @@ const saveIssue= async (isuObj)=> {
 
 module.exports= {
     getIssues: getIssues,
-    saveIssue: saveIssue
+    saveIssue: saveIssue,
+    getIssue: getIssue
 }
