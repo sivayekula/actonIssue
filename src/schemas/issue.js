@@ -1,5 +1,14 @@
 "use strict";
 const mongoose= require("mongoose");
+const geoSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    default: 'Point'
+  },
+  coordinates: {
+    type: [Number]
+  }
+}); 
 const IssueSchema= new mongoose.Schema({
   title: {
     type: String,
@@ -20,6 +29,10 @@ const IssueSchema= new mongoose.Schema({
   address: {
     type: Object,
     required: true
+  },
+  location: {
+    type:geoSchema,
+    index: '2dsphere'
   },
   landmark: {
     type: String
@@ -57,5 +70,5 @@ const IssueSchema= new mongoose.Schema({
         updatedAt: 'updated_at'
     }
 });
-
+ 
 module.exports= mongoose.model("issue", IssueSchema);

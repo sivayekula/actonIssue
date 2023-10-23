@@ -20,9 +20,12 @@ const getissue= async (req, res)=> {
 
 const issuesList= async (req, res)=> {
     try{
-        let filter= {isActive: true}
-        let issue= await getIssues(filter)
-        res.status(200).json({sucess: true, message: "List of issues", data: issue})
+        let filter={}//{isActive: true}
+        if(req.params.startDate) filter["created_at"]= {$gte: req.params.startDate}
+        if(req.params.endDate) filter["created_at"]= {$lte: req.params.endDate}
+        if(req.params.status) filter["status"]= req.params.status
+        let issue= await getIssues(filter, req.query.page ? req.query.page : 0)
+        res.status(200).json({sucess: true, message: "List of issues", data: issue[0].result, total: issue[0].count ? issue[0].count.count : 0})
     }catch(err) {
         res.status(400).json({sucess: false, message: err.message})
     }
@@ -48,7 +51,7 @@ const createissue= async (req, res)=> {
             imgs.push(name)
             await saveImage(data, imgPath)
         }
-        let isuObj= {hashId:uniqid.process("#"), title: req.body.title, description: req.body.description, images: imgs, address: address, categoryId: req.body.category, userId: req.user.userId}
+        let isuObj= {hashId:uniqid.process("#"), title: req.body.title, description: req.body.description, images: imgs, address: address, location: { type: 'Point', coordinates:[address.lat_lng.lat, address.lat_lng.lng]}, categoryId: req.body.category, userId: req.user.userId}
         let issue= await saveIssue(isuObj)
         res.status(200).json({sucess: true, message: "Issue created successfully", data: issue})
     }catch(err) {
