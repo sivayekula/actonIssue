@@ -17,7 +17,7 @@ const getIssues= async (issueFilter, currentPage)=> {
             //     }
             // },
             {
-                $match: {location: {$geoWithin: {$center: [[16.8913007, 81.9386293], 1]}}}
+                $match: {location: {$geoWithin: {$center: [[16.8913007, 81.9386293], 10]}}}
             },{
                 $sort: {
                     created_at: -1
