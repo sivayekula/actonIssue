@@ -27,12 +27,6 @@ const getIssues= async (issueFilter, currentPage)=> {
             },{
                 $facet: {
                     result: [
-                        {
-                            $skip: skip
-                        },
-                        {
-                            $limit: config.ISSEUS_PER_PAGE
-                        }
                         // {
                         //     $project: {
                         //         created_at: 0,
