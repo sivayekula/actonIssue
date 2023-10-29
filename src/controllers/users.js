@@ -5,6 +5,8 @@ const { getUser, createUser, userLogin, updateUserDetails }= require("../models/
 const validator = require('validator');
 const fs = require('fs')
 const path = require('path')
+const { Vonage } = require('@vonage/server-sdk')
+const nodemailer = require("nodemailer");
 const { issueToken } = require("../middlewares/tokenValidator");
 const bcrypt = require('bcrypt');
 const imagePath= "../uploads/users/";
@@ -30,6 +32,7 @@ const signup= async (req, res)=> {
             res.status(200).json({success: true, message: `Otp sent to ${req.body.loginId} successfully`, data: {userId: user._id}})
         }
     }catch(err) {
+        console.log(err)
         res.status(400).json({success: false, message: err.message})
     }
 }
@@ -158,11 +161,33 @@ const sendOtp= async (otp, userId, notificationSource, isEmail)=> {
     try{
         if(isEmail) {
             //send email for otp
+            const transporter = nodemailer.createTransport({
+                service: "gmail",
+                auth: {
+                  user: "siva.yekula@gmail.com", // Your Ethereal Email address
+                  pass: "bbxg ipvl rwhy gwdu", // Your Ethereal Email password
+                }
+              });
+              let info = await transporter.sendMail({
+                from: 'siva.yekula@gmail.com',
+                to: notificationSource, // Test email address
+                subject: "Verify your account",
+                html: "Please use OTP :<strong>"+otp+"</strong> to verify your email.",
+              });
+              console.log("Message sent: %s", info.messageId); // Output message ID
         } else {
-            // send sms for otp
+            const vonage = new Vonage({
+                apiKey: "dcb50669",
+                apiSecret: "a0bKPKVz7IycGSgy"
+            })
+            const from = "Vonage APIs"
+            const to = "91"+notificationSource
+            const text = 'Your OTP is : '+otp
+            await vonage.sms.send({to, from, text})
         }
         setCache(userId, otp)
     }catch(err){
+        console.log(err)
         console.log(otp, userId, notificationSource, isEmail)
         throw new Error(err.message ? err.message : "Unable to send email or sms")
     }

@@ -10,15 +10,11 @@ const UserSchema= new mongoose.Schema({
   },
   email: {
     type: String,
-    unique: true,
-    required: function() { return this.mobile === ''; },
-    createIndexes: { unique: true }
+    required: function() { return this.mobile ? false : true; }
   },
   mobile: {
     type: String,
-    unique: true,
-    required: function() { return this.email === ''; },
-    createIndexes: { unique: true }
+    required: function() { return this.email ? false : true; }
   },
   password: {
     type: String,
