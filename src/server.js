@@ -28,8 +28,8 @@ app.use('/', indexRouter);
 app.use('/api/user', userRouter);
 app.use('/api/category', categoryRouter);
 app.use('/api/issue', issueRouter);
-app.use('/comment', commentRouter);
-app.use('/flag', flagRouter);
+app.use('/api/comment', commentRouter);
+app.use('/api/flag', flagRouter);
 app.use("/api/trandingNews", newsRouter)
 app.use(express.static(__dirname + '/uploads'))
 

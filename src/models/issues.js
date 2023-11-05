@@ -58,7 +58,7 @@ const getIssues= async (issueFilter, currentPage)=> {
 }
 const getIssue= async (isuId)=> {
     try{
-        let issue= await Issue.findOne({$or:[{_id: isuId}, {hashId: isuId}]})
+        let issue= await Issue.findOne({$or:[{_id: isuId}, {hashId: isuId}]}).populate("categoryId")
         return issue
     }catch(err) {
         throw err

@@ -3,6 +3,8 @@ const fs= require("fs")
 const path= require("path")
 const { getIssues, saveIssue, getIssue } = require("../models/issues")
 const uniqid= require("uniqid");
+const { getComments, getCommentsCount } = require("../models/comments");
+const { getFlags, getFlagsCount } = require("../models/likes");
 
 const getissue= async (req, res)=> {
     try{
@@ -20,12 +22,20 @@ const getissue= async (req, res)=> {
 
 const issuesList= async (req, res)=> {
     try{
+        let issuesData= []
         let filter={}//{isActive: true}
         if(req.params.startDate) filter["created_at"]= {$gte: req.params.startDate}
         if(req.params.endDate) filter["created_at"]= {$lte: req.params.endDate}
         if(req.params.status) filter["status"]= req.params.status
         let issue= await getIssues(filter, req.query.page ? req.query.page : 0)
-        res.status(200).json({sucess: true, message: "List of issues", data: issue[0].result, total: issue[0].count ? issue[0].count.count : 0})
+        issuesData= issue[0].result;
+        for(let i= 0; i< issuesData.length; i++){
+            let comments= await getCommentsCount(issuesData[i]._id)
+            let flags= await getFlagsCount(issuesData[i]._id)
+            issuesData[i]["commentsCount"] = comments
+            issuesData[i]["flagsCount"] = flags
+        }
+        res.status(200).json({sucess: true, message: "List of issues", data: issuesData, total: issue[0].count ? issue[0].count.count : 0})
     }catch(err) {
         res.status(400).json({sucess: false, message: err.message})
     }

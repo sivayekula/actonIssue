@@ -15,7 +15,7 @@ const createComment= async (req, res)=> {
 
 const commentsList= async (req, res)=>{
     try{
-        let cmtId= req.params.commentId;
+        let cmtId= req.params.issueId;
         let comments= await getComments(cmtId)
         res.status(200).json({success: true, message: "List of comments", data: comments})
     }catch(err){

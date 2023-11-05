@@ -13,7 +13,7 @@ const saveComment= async (comntObj)=> {
 
 const getComments= async (comntId)=> {
     try{
-        let comments= await Comment.find({$or:[{_id: comntId}, {userId: comntId}, {issueId: comntId}]});
+        let comments= await Comment.find({$or:[{_id: comntId}, {userId: comntId}, {issueId: comntId}]}).populate("userId");
         return comments
     }catch(err){
         throw err

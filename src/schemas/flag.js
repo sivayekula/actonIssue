@@ -2,10 +2,6 @@
 const mongoose= require("mongoose");
 
 const FlagSchema= new mongoose.Schema({
-  name: {
-    type: Number,
-    required: true
-  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
