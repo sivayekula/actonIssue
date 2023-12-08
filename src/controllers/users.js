@@ -33,7 +33,19 @@ otpRef.set({
   expiresAt: Date.now() + 5 * 60 * 1000, // OTP expires in 5 minutes
 });
 admin
-  .auth()
+  .auth().getUserByPhoneNumber(phoneNumber)
+  .then((userRecord) => {
+    // User exists, update the phone number
+    return admin.auth().updateUser(userRecord.uid, {
+      phoneNumber: phoneNumber,
+    });
+  })
+  .catch((error) => {
+    // User does not exist, create a new user
+    return admin.auth().createUser({
+      phoneNumber: phoneNumber,
+    });
+  })
   .sendSignInLinkToPhone(phoneNumber, {
     handleCodeInApp: true,
     // You can customize the message here if needed
