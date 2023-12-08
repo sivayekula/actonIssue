@@ -1,5 +1,6 @@
 "use strict";
 const NodeCache= require( "node-cache" );
+const axios= require('axios');
 const myCache= new NodeCache( { stdTTL: 100, checkperiod: 120 } );
 const { getUser, createUser, userLogin, updateUserDetails }= require("../models/users");
 const validator = require('validator');
@@ -10,27 +11,68 @@ const nodemailer = require("nodemailer");
 const { issueToken } = require("../middlewares/tokenValidator");
 const bcrypt = require('bcrypt');
 const imagePath= "../uploads/users/";
+const admin = require("firebase-admin");
+const serviceAccount = require("../actonissue-firebase.json");
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: 'https://actonissue.firebaseio.com',
+});
 
 const signup= async (req, res)=> {
     try{
-        let user= await userLogin(req.body.loginId);
-        if(user && user.is_verified) {
-            res.status(400).json({success: false, message: "User already existed with this email or mobile number"})
-        } else {
-            let isEmail= await validator.isEmail(req.body.loginId)
-            let userObj;
-            if(!user){
-                if(isEmail) {
-                    userObj= {name: req.body.name, email: req.body.loginId, password: req.body.password}
-                } else {
-                    userObj= {name: req.body.name, mobile: req.body.loginId, password: req.body.password}
-                }
-                user = await createUser(userObj)
-            }
-            let token= await genarateOTP()
-            await sendOtp(token, user._id, req.body.loginId, isEmail)
-            res.status(200).json({success: true, message: `Otp sent to ${req.body.loginId} successfully`, data: {userId: user._id}})
-        }
+        const phoneNumber = req.body.loginId; // Replace with the user's phone number
+        
+        // Generate a random 6-digit OTP
+const otp = Math.floor(100000 + Math.random() * 900000);
+
+// Set the OTP in the Firebase Realtime Database (You can use Firestore too)
+const database = admin.database();
+const otpRef = database.ref(`/otp/${phoneNumber}`);
+otpRef.set({
+  code: otp,
+  expiresAt: Date.now() + 5 * 60 * 1000, // OTP expires in 5 minutes
+});
+admin
+  .auth()
+  .sendSignInLinkToPhone(phoneNumber, {
+    handleCodeInApp: true,
+    // You can customize the message here if needed
+    message: 'Your OTP is: ' + otp,
+  })
+  .then(() => {
+    console.log('OTP sent successfully');
+  })
+  .catch((error) => {
+    console.error('Error sending OTP:', error);
+  });
+        // auth.createUser({
+        //     phoneNumber: "+91"+phoneNumber,
+        // }).then((userRecord) => {
+        //     // The user has been created, and Firebase Authentication has sent an OTP SMS
+        //     console.log('OTP SMS sent successfully');
+        //     console.log('User UID:', userRecord.uid, userRecord);
+        // }).catch((error) => {
+        //     console.error('Error sending OTP SMS:', error);
+        // });
+
+        // let user= await userLogin(req.body.loginId);
+        // if(user && user.is_verified) {
+        //     res.status(400).json({success: false, message: "User already existed with this email or mobile number"})
+        // } else {
+        //     let isEmail= await validator.isEmail(req.body.loginId)
+        //     let userObj;
+        //     if(!user){
+        //         if(isEmail) {
+        //             userObj= {name: req.body.name, email: req.body.loginId, password: req.body.password}
+        //         } else {
+        //             userObj= {name: req.body.name, mobile: req.body.loginId, password: req.body.password}
+        //         }
+        //         user = await createUser(userObj)
+        //     }
+        //     let token= await genarateOTP()
+        //     await sendOtp(token, user._id, req.body.loginId, isEmail)
+        //     res.status(200).json({success: true, message: `Otp sent to ${req.body.loginId} successfully`, data: {userId: user._id}})
+        // }
     }catch(err) {
         console.log(err)
         res.status(400).json({success: false, message: err.message})
@@ -175,15 +217,65 @@ const sendOtp= async (otp, userId, notificationSource, isEmail)=> {
                 html: "Please use OTP :<strong>"+otp+"</strong> to verify your email.",
               });
               console.log("Message sent: %s", info.messageId); // Output message ID
-        } else {
-            const vonage = new Vonage({
-                apiKey: "dcb50669",
-                apiSecret: "a0bKPKVz7IycGSgy"
-            })
-            const from = "Vonage APIs"
-            const to = "91"+notificationSource
-            const text = 'Your OTP is : '+otp
-            await vonage.sms.send({to, from, text})
+        } else { 
+            var https = require('follow-redirects').https;
+var fs = require('fs');
+
+var options = {
+    'method': 'POST',
+    'hostname': 'n8d648.api.infobip.com',
+    'path': '/sms/2/text/advanced',
+    'headers': {
+        'Authorization': 'App 6c8f41c323319f119d3c5faabe1b5870-141de17d-34a2-4061-9b3e-cd158b68b873',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    },
+    'maxRedirects': 20
+};
+
+var req = https.request(options, function (res) {
+    var chunks = [];
+
+    res.on("data", function (chunk) {
+        chunks.push(chunk);
+    });
+
+    res.on("end", function (chunk) {
+        var body = Buffer.concat(chunks);
+        console.log(body.toString());
+    });
+
+    res.on("error", function (error) {
+        console.error(error);
+    });
+});
+
+var postData = JSON.stringify({
+    "messages": [
+        {
+            "destinations": [
+                {
+                    "to": "91"+notificationSource
+                }
+            ],
+            "from": "InfoSMS",
+            "text": "This is a sample message"+otp
+        }
+    ]
+});
+
+req.write(postData);
+
+req.end();
+            // const apiKey = "NjE3NDU4NDU1ODc5NmI3ODU2NmI0NzM1N2E3YTU0NmY=" 
+            // const sender = "Act On Issue"
+            // let number = "91"+notificationSource
+            // let applicationName = "ActOnIssue"
+            // let otp = "123123"
+            // let message = encodeURIComponent(`Welcome to ${applicationName}, Your OTP is ${otp}. Thanks Act On Issue`);
+            // let url = "http://api.textlocal.in/send/?" + 'apiKey=' + apiKey + '&sender=' + sender + '&numbers=' + number + '&message=' + message
+            // let response= await axios.post(url)
+            // console.log(response.data)
         }
         setCache(userId, otp)
     }catch(err){

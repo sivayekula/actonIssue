@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.use(express.json())
 
-router.get('/:issueId', verifyToken, commentsList)
+router.get('/:issueId', commentsList)
 // router.get('/:commentId', commentsCount)
 router.post('/', verifyToken, createComment)
 

@@ -57,8 +57,14 @@ const IssueSchema= new mongoose.Schema({
   },
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
     ref: "category"
+  },
+  otherCategory: {
+    type: String
+  },
+  isSwatchBharat: {
+    type: Boolean,
+    default: false
   },
   isActive: {
     type: Boolean,

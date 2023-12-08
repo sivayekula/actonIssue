@@ -30,7 +30,7 @@ const createUser= async (requestBody)=> {
 
 const updateUserDetails= async (userObj, userId) => {
     try{
-       let user= await User.findByIdAndUpdate(userId, userObj)
+       let user= await User.findByIdAndUpdate(userId, userObj, {new: true})
        return user
     }catch(err){
         throw err

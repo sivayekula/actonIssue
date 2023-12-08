@@ -2,55 +2,9 @@ const Issue= require("../schemas/issue");
 const config= require("../config/config");
 
 
-const getIssues= async (issueFilter, currentPage)=> {
+const getIssues= async (issueFilter, page = 1, pageSize = 1)=> {
     try{
-        const proximity= 1000;
-        const skip = currentPage * config.ISSEUS_PER_PAGE - config.ISSEUS_PER_PAGE;
-        const query = [
-            // {
-            //     $geoNear: {
-            //         includeLocs: "location",
-            //         distanceField: "distance",
-            //         near: {type: 'Point', coordinates: ['17.4833526', "78.3870668"]},
-            //         maxDistance: 1000,
-            //         spherical: true
-            //     }
-            // },
-            {
-                $match: {location: {$geoWithin: {$center: [[16.8913007, 81.9386293], 10]}}}
-            },{
-                $sort: {
-                    created_at: -1
-                }
-            },{ 
-                $lookup: {from: 'categories', localField: 'categoryId', foreignField: '_id', as: 'categoryId'} 
-            },{
-                $facet: {
-                    result: [
-                        // {
-                        //     $project: {
-                        //         created_at: 0,
-                        //         updated_at: 0,
-                        //         __v: 0
-                        //     }
-                        // }
-                    ],
-                    count: [
-                        {
-                            $count: "count"
-                        }
-                    ]
-                }
-            },{
-                $project: {
-                    result: 1,
-                    count: {
-                        $arrayElemAt: ["$count", 0]
-                    }
-                }
-            }
-        ];
-        let documents= await Issue.aggregate(query)
+        let documents= await Issue.find(issueFilter).populate("categoryId")   //.skip(skip).limit(pageSize) for pagination
         return documents
     }catch(err) {
         throw err
