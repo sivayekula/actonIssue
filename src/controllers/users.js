@@ -20,71 +20,24 @@ admin.initializeApp({
 
 const signup= async (req, res)=> {
     try{
-        const phoneNumber = req.body.loginId; // Replace with the user's phone number
-        
-        // Generate a random 6-digit OTP
-const otp = Math.floor(100000 + Math.random() * 900000);
-
-// Set the OTP in the Firebase Realtime Database (You can use Firestore too)
-const database = admin.database();
-const otpRef = database.ref(`/otp/${phoneNumber}`);
-otpRef.set({
-  code: otp,
-  expiresAt: Date.now() + 5 * 60 * 1000, // OTP expires in 5 minutes
-});
-admin
-  .auth().getUserByPhoneNumber(phoneNumber)
-  .then((userRecord) => {
-    // User exists, update the phone number
-    return admin.auth().updateUser(userRecord.uid, {
-      phoneNumber: phoneNumber,
-    });
-  })
-  .catch((error) => {
-    // User does not exist, create a new user
-    return admin.auth().createUser({
-      phoneNumber: phoneNumber,
-    });
-  })
-  .sendSignInLinkToPhone(phoneNumber, {
-    handleCodeInApp: true,
-    // You can customize the message here if needed
-    message: 'Your OTP is: ' + otp,
-  })
-  .then(() => {
-    console.log('OTP sent successfully');
-  })
-  .catch((error) => {
-    console.error('Error sending OTP:', error);
-  });
-        // auth.createUser({
-        //     phoneNumber: "+91"+phoneNumber,
-        // }).then((userRecord) => {
-        //     // The user has been created, and Firebase Authentication has sent an OTP SMS
-        //     console.log('OTP SMS sent successfully');
-        //     console.log('User UID:', userRecord.uid, userRecord);
-        // }).catch((error) => {
-        //     console.error('Error sending OTP SMS:', error);
-        // });
-
-        // let user= await userLogin(req.body.loginId);
-        // if(user && user.is_verified) {
-        //     res.status(400).json({success: false, message: "User already existed with this email or mobile number"})
-        // } else {
-        //     let isEmail= await validator.isEmail(req.body.loginId)
-        //     let userObj;
-        //     if(!user){
-        //         if(isEmail) {
-        //             userObj= {name: req.body.name, email: req.body.loginId, password: req.body.password}
-        //         } else {
-        //             userObj= {name: req.body.name, mobile: req.body.loginId, password: req.body.password}
-        //         }
-        //         user = await createUser(userObj)
-        //     }
-        //     let token= await genarateOTP()
-        //     await sendOtp(token, user._id, req.body.loginId, isEmail)
-        //     res.status(200).json({success: true, message: `Otp sent to ${req.body.loginId} successfully`, data: {userId: user._id}})
-        // }
+        let user= await userLogin(req.body.loginId);
+        if(user && user.is_verified) {
+            res.status(400).json({success: false, message: "User already existed with this email or mobile number"})
+        } else {
+            let isEmail= await validator.isEmail(req.body.loginId)
+            let userObj;
+            if(!user){
+                if(isEmail) {
+                    userObj= {name: req.body.name, email: req.body.loginId, password: req.body.password}
+                } else {
+                    userObj= {name: req.body.name, mobile: req.body.loginId, password: req.body.password}
+                }
+                user = await createUser(userObj)
+            }
+            let token= await genarateOTP()
+            await sendOtp(token, user._id, req.body.loginId, isEmail)
+            res.status(200).json({success: true, message: `Otp sent to ${req.body.loginId} successfully`, data: {userId: user._id}})
+        }
     }catch(err) {
         console.log(err)
         res.status(400).json({success: false, message: err.message})
