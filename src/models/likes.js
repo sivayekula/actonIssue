@@ -11,9 +11,9 @@ const saveFlag= async (flagObj)=> {
     }
 }
 
-const getFlags= async (flagId)=> {
+const getFlag= async (filter)=> {
     try{
-        let flags= await Flag.find({$or:[{_id: flagId}, {userId: flagId}, {issueId: flagId}]});
+        let flags= await Flag.findOne(filter);
         return flags
     }catch(err){
         throw err
@@ -29,8 +29,18 @@ const getFlagsCount= async (flagId)=> {
     }
 }
 
+const updateFlag= async (id, flagObj)=> {
+    try{
+        let flag= await Flag.findByIdAndUpdate(id, flagObj, {new: true})
+        return flag
+    } catch(err){
+        throw err
+    }
+}
+
 module.exports= {
     saveFlag: saveFlag,
-    getFlags: getFlags,
-    getFlagsCount: getFlagsCount
+    getFlag: getFlag,
+    getFlagsCount: getFlagsCount,
+    updateFlag: updateFlag
 }

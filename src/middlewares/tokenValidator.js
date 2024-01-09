@@ -25,7 +25,25 @@ const verifyToken = (req, res, next) => {
     }
 }
 
+const sessionChecker = (req, res, next) => {    
+    // console.log(`Session Checker: ${req.session.token}`);
+    if (req.session.token) {
+        try {
+            let decoded = jwt.verify(req.session.token, config.JWT_SECRET)
+            req.user= decoded;
+            next();
+        }catch(err) {
+            res.redirect('/admin');
+        }
+    } else {
+        // console.log(`No User Session Found`);
+        res.redirect('/admin');
+    }
+};
+
+
 module.exports = {
     issueToken: issueToken,
-    verifyToken: verifyToken
+    verifyToken: verifyToken,
+    sessionChecker: sessionChecker
 }

@@ -29,8 +29,18 @@ const getCommentsCount= async (comntId)=> {
     }
 }
 
+const deleteComment= async (comntId)=> {
+    try{
+        let status= await Comment.findByIdAndRemove(comntId);
+        return status
+    }catch(err){
+        return err.message
+    }
+}
+
 module.exports= {
     saveComment: saveComment,
     getComments: getComments,
-    getCommentsCount: getCommentsCount
+    getCommentsCount: getCommentsCount,
+    deleteComment: deleteComment
 }

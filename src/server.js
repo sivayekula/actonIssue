@@ -1,7 +1,10 @@
+"use strict";
 const express = require('express');
 const app = new express();
 const port = process.env.PORT || 8000;
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const indexRouter = require('./routers/index');
 const db = require('./db');
 const categoryRouter = require('./routers/categories');
@@ -10,8 +13,12 @@ const flagRouter = require('./routers/flag');
 const commentRouter = require('./routers/comments');
 const issueRouter = require('./routers/issues');
 const newsRouter = require("./routers/news");
+const adminRouter= require("./routers/admin");
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
+const User= require("./schemas/user")
+const jwt= require("jsonwebtoken")
+
 
 //Express methods
 app.use(express.json({limit:"10mb"}))
@@ -19,6 +26,31 @@ app.use(express.urlencoded({extended: true,limit:"10mb"}))
 
 // cors
 app.use(cors())
+app.use(cookieParser());
+
+
+app.use(session({
+    name: "ActOnIssue",
+    secret: 'ActOnIssue_secrect',
+    saveUninitialized: false,
+    resave: false,
+    cookie: { 
+        secure: false, // This will only work if you have https enabled!
+        maxAge: 60000*120 // 2 hours
+    } 
+}));
+app.use(function(req, res, next) {
+    if(req.session.token){
+        let userObj = jwt.decode(req.session.token);
+        res.locals.user= JSON.stringify(userObj)
+    }
+    next();
+});
+app.set('view engine', 'ejs');
+app.use(express.static("assets"))
+app.use(express.static(__dirname + '/uploads'))
+
+
 
 // api documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -31,9 +63,16 @@ app.use('/api/issue', issueRouter);
 app.use('/api/comment', commentRouter);
 app.use('/api/flag', flagRouter);
 app.use("/api/trandingNews", newsRouter)
-app.use(express.static(__dirname + '/uploads'))
 
-app.listen(port, ()=> {
+app.use("/admin", adminRouter)
+
+
+
+
+
+
+app.listen(port, async ()=> {
+    // await new User({name: "admin", mobile: "98765", email: "admin@actonissues.com", password: "Admin@123", role: "admin", is_verified: true}).save()
     console.log(`server is running on :: ${port}`)
 })
 

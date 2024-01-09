@@ -10,17 +10,15 @@ const loginSchema = [
 ];
 
 const signupSchema = [
-    oneOf(
-        [check('loginId').matches(/^\d{10}$/), check('loginId').isEmail().normalizeEmail()],
-        {message: "Valid email or phoneNumber is required"}
-    ),
+    check('loginId').matches(/^\d{10}$/).withMessage("Valid phoneNumber is required"),
+    check('email').isEmail().normalizeEmail().withMessage("Valid email is required"), 
     check("name").isAlphanumeric().isLength({min: 3, max: 200}).withMessage("Name must be graterthen 3 and lessthen 200"),
     check("password").isLength({min: 6, max: 20}).withMessage("Password must be graterthen 6 and lessthen 20")
 ];
 
 const verifyOTPSchema = [
     check('userId').isMongoId().withMessage("Please provide valid userId"),
-    check("token").isAlphanumeric().isLength({min: 4, max: 4}).withMessage("Token must be 4 charecters long")
+    check("is_verified").isBoolean().withMessage("Verification status is required")
 ];
 
 const resendOTPSchema = [

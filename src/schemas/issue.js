@@ -48,6 +48,7 @@ const IssueSchema= new mongoose.Schema({
   },
   status: {
     type: String,
+    enum: ["created", "approved", "rejected", "resolved"],
     default: "created"
   },
   userId: {
@@ -67,6 +68,10 @@ const IssueSchema= new mongoose.Schema({
     default: false
   },
   isActive: {
+    type: Boolean,
+    default: true
+  },
+  isHotIssue: {
     type: Boolean,
     default: false
   }

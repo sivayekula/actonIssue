@@ -123,13 +123,17 @@
         "type": "object",
         "required": [
           "name",
-          "loginId"
+          "loginId",
+          "password"
         ],
         "properties": {
           "name": {
             "type": "string"
           },
           "loginId": {
+            "type": "string"
+          },
+          "password": {
             "type": "string"
           }
         }

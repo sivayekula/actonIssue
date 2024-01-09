@@ -19,6 +19,15 @@ const getUser= async (userId)=> {
     }
 }
 
+const listOfUsers= async()=> {
+    try{
+        let users= await User.find({role:{$ne: "admin"}}).select("-password")
+        return users;
+    }catch(err) {
+        throw err
+    }
+}
+
 const createUser= async (requestBody)=> {
     try{
         let user= await new User(requestBody).save();
@@ -42,5 +51,6 @@ module.exports= {
     getUser: getUser,
     createUser: createUser,
     userLogin: userLogin,
-    updateUserDetails: updateUserDetails
+    updateUserDetails: updateUserDetails,
+    listOfUsers: listOfUsers
 }

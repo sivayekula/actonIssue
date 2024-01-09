@@ -1,10 +1,11 @@
 "use strict";
 const fs= require("fs")
 const path= require("path")
-const { getIssues, saveIssue, getIssue } = require("../models/issues")
+const { getIssues, saveIssue, getIssue, updateIssueDetails } = require("../models/issues")
 const uniqid= require("uniqid");
 const { getComments, getCommentsCount } = require("../models/comments");
 const { getFlags, getFlagsCount } = require("../models/likes");
+const moment = require('moment-timezone');
 
 const getissue= async (req, res)=> {
     try{
@@ -23,31 +24,28 @@ const getissue= async (req, res)=> {
 const issuesList= async (req, res)=> {
     try{
         let issuesData= []
-        let filter={}//{isActive: true}
-        if(req.params.startDate) filter["created_at"]= {$gte: req.params.startDate}
-        if(req.params.endDate) filter["created_at"]= {$lte: req.params.endDate}
-        if(req.params.status) filter["status"]= req.params.status
-        if(req.params.location){
+        let filter={}
+        if(req.query.startDate && req.query.endDate) filter["created_at"]= {$gte: new Date(req.query.startDate), $lte: new Date(req.query.endDate)}
+        if(req.query.status) filter["status"]= req.query.status == "All" ? {$ne: "created"} : req.query.status == "Open" ? "approved" : req.query.status.toLowerCase()
+        if(req.query.lat && req.query.lng){
             const maxDistance = 5000;
             filter['location']= { 
                 $near: {
                     $geometry: {
                         type: "Point" ,
-                        coordinates: [17.494793, 78.399643] 
+                        coordinates: [req.query.lat*1, req.query.lng*1] 
                     },
                     $maxDistance : maxDistance
                 }
             }
         }
         let documents= await getIssues(filter)
-        issuesData= documents;
-        for(let i= 0; i< issuesData.length; i++){
-            let comments= await getCommentsCount(issuesData[i]._id)
-            let flags= await getFlagsCount(issuesData[i]._id)
-            issuesData[i]["commentsCount"] = comments
-            issuesData[i]["flagsCount"] = flags
+        for(let i= 0; i< documents.length; i++) {
+            let comments= await getCommentsCount(documents[i]._id)
+            let flags= await getFlagsCount(documents[i]._id)
+            issuesData.push({...documents[i]._doc, commentsCount: comments, flagsCount: flags})
         }
-        res.status(200).json({sucess: true, message: "List of issues", data: issuesData,})
+        res.status(200).json({sucess: true, message: "List of issues", data: issuesData})
     }catch(err) {
         res.status(400).json({sucess: false, message: err.message})
     }
@@ -82,6 +80,31 @@ const createissue= async (req, res)=> {
     }
 }
 
+const getUserIssues= async (req, res)=> {
+    try{
+        let documents= await getIssues({userId: req.params.userId})
+        res.status(200).json({sucess: false, message: "user issues", data: documents})
+    } catch(err){
+        res.status(400).json({sucess: false, message: err.message})
+    }
+}
+
+const updateIssue= async (req, res)=> {
+    try {
+        let issue= await getIssue(req.body.issueId);
+        let issueObj= {}
+        if(issue) {
+            if(req.body.status) {
+                issueObj['status']= req.body.status
+            }
+        }
+        let updatedIssue= await updateIssueDetails(issue._id, issueObj)
+        res.status(200).json({sucess: true, message: "Issue status updated successfully", data: updatedIssue})
+    }catch(err){
+        res.status(400).json({sucess: false, message: err.message})
+    }
+}
+
 async function saveImage(img, filePath) {
     try{
         await fs.promises.writeFile(path.join(__dirname, filePath), img);
@@ -93,6 +116,8 @@ async function saveImage(img, filePath) {
 
 module.exports = {
     getissue: getissue,
+    getMyIssues: getUserIssues,
     createissue: createissue,
-    issuesList: issuesList
+    issuesList: issuesList,
+    updateIssue: updateIssue
 }
