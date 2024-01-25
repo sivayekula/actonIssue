@@ -6,6 +6,7 @@ const { saveComment, getComments, getCommentsCount } = require("../models/commen
 const createComment= async (req, res)=> {
     try{
         let comntObj= {comment: req.body.comment, userId: req.user.userId, issueId: req.body.issueId}
+        if(req.body.replyTo) comntObj["commentId"]= req.body.replyTo;
         let comment= await saveComment(comntObj);
         res.status(200).json({success: true, message: "Comment added successfully", data: comment})
     }catch(err){

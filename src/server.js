@@ -62,6 +62,7 @@ app.use('/api/category', categoryRouter);
 app.use('/api/issue', issueRouter);
 app.use('/api/comment', commentRouter);
 app.use('/api/flag', flagRouter);
+app.use('/api/views', flagRouter);
 app.use("/api/trandingNews", newsRouter)
 
 app.use("/admin", adminRouter)

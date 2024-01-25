@@ -26,7 +26,11 @@
                     $("#msg").html("Are you sure. Do you want to approve the Issue")
                 }else if(status == "rejected"){
                     $("#msg").html("Are you sure. Do you want to reject the Issue")
-                } else {
+                } else if(status == "hot"){
+                    $("#msg").html("Are you sure. Do you want make Issue as hot Issue")
+                } else if(status == "unhot"){
+                    $("#msg").html("Are you sure. Do you want remove Issue as hot Issue")
+                }else {
                     $("#msg").html("Are you sure. Do you want to resolve the Issue")
                 }
            }
@@ -92,8 +96,9 @@
                                         <% if(issue.status == "created") { %>
                                         <a href="#" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="updateIssueStatus('<%= issue._id %>', 'approved')">Approve</a>
                                         <a href="#" class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="updateIssueStatus('<%= issue._id %>', 'rejected')">Reject</a>
-                                        <% } if(issue.status == "approved") { %>
-                                        <a href="#" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="updateIssueStatus('<%= issue._id %>', true)">Make Hot Issue</a>
+                                        <% } if(issue.status == "approved") { if(issue.isHotIssue) {%>
+                                        <a href="#" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="updateIssueStatus('<%= issue._id %>', 'unhot')">Remove As Hot Issue</a><%} else { %>
+                                            <a href="#" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="updateIssueStatus('<%= issue._id %>', 'hot')">Make Hot Issue</a> <%}%>
                                         <a href="#" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="updateIssueStatus('<%= issue._id %>', 'resolved')">Resolve</a>
                                         <% } %>
                                     </div>

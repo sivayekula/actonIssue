@@ -1,5 +1,6 @@
 "use strict";
 const Flag= require("../schemas/flag")
+const Views= require("../schemas/views");
 
 
 const saveFlag= async (flagObj)=> {
@@ -11,6 +12,15 @@ const saveFlag= async (flagObj)=> {
     }
 }
 
+const addViewCount= async (viewObj)=> {
+    try{
+        let view= await new Views(viewObj).save();
+        return view
+    }catch(err){
+        throw err
+    } 
+}
+
 const getFlag= async (filter)=> {
     try{
         let flags= await Flag.findOne(filter);
@@ -20,9 +30,27 @@ const getFlag= async (filter)=> {
     }
 }
 
-const getFlagsCount= async (flagId)=> {
+const getView= async (filter)=> {
     try{
-        let flagsCount= await Flag.count({$or:[{_id: flagId}, {userId: flagId}, {issueId: flagId}]});
+        let view= await Views.findOne(filter);
+        return view
+    }catch(err){
+        throw err
+    }
+}
+
+const getViewsCount= async (issueId)=> {
+    try{
+        let viewsCount= await Views.count({issueId: issueId});
+        return viewsCount
+    }catch(err){
+        throw err
+    }
+}
+
+const getFlagsCount= async (flagId, status)=> {
+    try{
+        let flagsCount= await Flag.count({issueId: flagId, isLiked: status});
         return flagsCount
     }catch(err){
         throw err
@@ -42,5 +70,8 @@ module.exports= {
     saveFlag: saveFlag,
     getFlag: getFlag,
     getFlagsCount: getFlagsCount,
-    updateFlag: updateFlag
+    updateFlag: updateFlag,
+    addViewCount: addViewCount,
+    getView: getView,
+    getViewsCount: getViewsCount
 }

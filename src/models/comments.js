@@ -13,7 +13,7 @@ const saveComment= async (comntObj)=> {
 
 const getComments= async (comntId)=> {
     try{
-        let comments= await Comment.find({$or:[{_id: comntId}, {userId: comntId}, {issueId: comntId}]}).populate("userId");
+        let comments= await Comment.find({$or:[{_id: comntId}, {userId: comntId}, {issueId: comntId}]}).populate("userId", "name profile_pic").populate("commentId", "comment userId");
         return comments
     }catch(err){
         throw err
@@ -22,7 +22,7 @@ const getComments= async (comntId)=> {
 
 const getCommentsCount= async (comntId)=> {
     try{
-        let commentsCount= await Comment.count({$or:[{_id: comntId}, {userId: comntId}, {issueId: comntId}]});
+        let commentsCount= await Comment.count({$or:[{userId: comntId}, {issueId: comntId}]});
         return commentsCount
     }catch(err){
         throw err
