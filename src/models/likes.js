@@ -57,6 +57,15 @@ const getFlagsCount= async (flagId, status)=> {
     }
 }
 
+const getFlags= async (issueIds, status)=> {
+    try{
+        let flagsCount= await Flag.find({issueId: {$in: issueIds}, isLiked: status}).populate("userId", "name");
+        return flagsCount
+    }catch(err){
+        throw err
+    }
+}
+
 const updateFlag= async (id, flagObj)=> {
     try{
         let flag= await Flag.findByIdAndUpdate(id, flagObj, {new: true})
@@ -70,6 +79,7 @@ module.exports= {
     saveFlag: saveFlag,
     getFlag: getFlag,
     getFlagsCount: getFlagsCount,
+    getFlags: getFlags,
     updateFlag: updateFlag,
     addViewCount: addViewCount,
     getView: getView,

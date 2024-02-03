@@ -2,8 +2,40 @@ const Issue= require("../schemas/issue");
 const config= require("../config/config");
 
 
-const getIssues= async (issueFilter, page = 1, pageSize = 1)=> {
+const getIssues= async (issueFilter)=> {
     try{
+        // let documents= await Issue.aggregate([
+        //     // locFilter,
+        //     {
+        //         $lookup: {
+        //             from: "comments",
+        //             localField: "_id",
+        //             foreignField: "issueId",
+        //             as: "comments"
+        //         }
+        //     },{
+        //         $lookup: {
+        //             from: "flags",
+        //             localField: "_id",
+        //             foreignField: "issueId",
+        //             pipeline: [
+        //                 {
+        //                     $match: {"isLiked": true}
+        //                 }
+        //             ],
+        //             as: "flags"
+        //         }
+        //     },{
+        //         $lookup: {
+        //             from: "views",
+        //             localField: "_id",
+        //             foreignField: "issueId",
+        //             as: "views"
+        //         }
+        //     }, {
+        //         $match: issueFilter
+        //     }
+        // ])
         let documents= await Issue.find(issueFilter).sort({created_at: -1}).populate("categoryId").populate("userId", "name")  //.skip(skip).limit(pageSize) for pagination
         return documents
     }catch(err) {

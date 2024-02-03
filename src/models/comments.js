@@ -20,6 +20,15 @@ const getComments= async (comntId)=> {
     }
 }
 
+const getcomments= async (issueIds)=> {
+    try{
+        let comments= await Comment.find({issueId:{$in: issueIds}}).populate("userId", "name profile_pic").populate("commentId", "comment userId");
+        return comments
+    }catch(err){
+        throw err
+    }
+}
+
 const getCommentsCount= async (comntId)=> {
     try{
         let commentsCount= await Comment.count({$or:[{userId: comntId}, {issueId: comntId}]});
@@ -41,6 +50,7 @@ const deleteComment= async (comntId)=> {
 module.exports= {
     saveComment: saveComment,
     getComments: getComments,
+    getcomments: getcomments,
     getCommentsCount: getCommentsCount,
     deleteComment: deleteComment
 }

@@ -12,13 +12,24 @@ const getissue= async (req, res)=> {
         let isuId= req.params.issueId;
         if(isuId) {
             let issue= await getIssue(isuId)
-            let supportCount= await getFlagsCount(isuId, true)
-            let unsupportCount= await getFlagsCount(isuId, false)
-            res.status(200).json({sucess: true, message: "Issue details", data: {...issue._doc, supportCount: supportCount, unsupportCount: unsupportCount}})
+            let supportCount= await getFlags(isuId, true)
+            let unsupportCount= await getFlags(isuId, false)
+            res.status(200).json({sucess: true, message: "Issue details", data: {...issue._doc, flags: supportCount, unflags: unsupportCount}})
         }else {
             res.status(400).json({sucess: false, message: "Issue id is required"})
         }
     }catch(err) {
+        res.status(400).json({sucess: false, message: err.message})
+    }
+}
+
+const getHotIssues= async (req, res)=> {
+    try{
+        let hotIssues= await getIssues({isHotIssue: true}, {status: "approved"})
+        // let generalIssues= await getIssues({isHotIssue: true}, {status: "approved"})
+        let swatchBharathIsues= await getIssues({isSwatchBharat: true}, {status: "approved"})
+        res.status(200).json({sucess: true, message: "List of hot issues", data: {hotIssues,swatchBharathIsues}})
+    }catch(err){
         res.status(400).json({sucess: false, message: err.message})
     }
 }
@@ -45,14 +56,13 @@ const issuesList= async (req, res)=> {
         let documents= await getIssues(filter)
         for(let i= 0; i< documents.length; i++) {
             let comments= await getCommentsCount(documents[i]._id)
-            let flags= await getFlagsCount(documents[i]._id, true)
+            let flags= await getFlags(documents[i]._id, true)
             let views= await getViewsCount(documents[i]._id)
-            issuesData.push({...documents[i]._doc, commentsCount: comments, flagsCount: flags, viewsCount: views})
+            issuesData.push({...documents[i]._doc, commentsCount: comments, flags: flags, viewsCount: views})
         }
-        let hotIssues= [];
-        if(req.query.status) hotIssues= await getIssues({isHotIssue: true})
-        res.status(200).json({sucess: true, message: "List of issues", data: issuesData, hotIssues: hotIssues})
+        res.status(200).json({sucess: true, message: "List of issues", data: issuesData})
     }catch(err) {
+        console.log(err)
         res.status(400).json({sucess: false, message: err.message})
     }
 }
@@ -128,5 +138,6 @@ module.exports = {
     getMyIssues: getUserIssues,
     createissue: createissue,
     issuesList: issuesList,
-    updateIssue: updateIssue
+    updateIssue: updateIssue,
+    getHotIssues: getHotIssues
 }
