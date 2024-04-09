@@ -1,7 +1,7 @@
 "use strict";
 const fs= require("fs")
 const path= require("path")
-const { getIssues, saveIssue, getIssue, updateIssueDetails } = require("../models/issues")
+const { getIssues, saveIssue, getIssue, updateIssueDetails, gethotIssues } = require("../models/issues")
 const uniqid= require("uniqid");
 const { getComments, getCommentsCount } = require("../models/comments");
 const { getFlags, getFlagsCount, getViewsCount } = require("../models/likes");
@@ -25,9 +25,9 @@ const getissue= async (req, res)=> {
 
 const getHotIssues= async (req, res)=> {
     try{
-        let hotIssues= await getIssues({isHotIssue: true}, {status: "approved"})
+        let hotIssues= await gethotIssues({isHotIssue: true}, {status: "approved"})
         // let generalIssues= await getIssues({isHotIssue: true}, {status: "approved"})
-        let swatchBharathIsues= await getIssues({isSwatchBharat: true}, {status: "approved"})
+        let swatchBharathIsues= await gethotIssues({isSwatchBharat: true}, {status: "approved"})
         res.status(200).json({sucess: true, message: "List of hot issues", data: {hotIssues,swatchBharathIsues}})
     }catch(err){
         res.status(400).json({sucess: false, message: err.message})
@@ -36,7 +36,7 @@ const getHotIssues= async (req, res)=> {
 
 const issuesList= async (req, res)=> {
     try{
-        let issuesData= []
+        let page= req.params.page ? req.params.page : 1
         let filter={}
         if(req.query.startDate && req.query.endDate) filter["created_at"]= {$gte: new Date(req.query.startDate), $lte: new Date(req.query.endDate)}
         if(req.query.status) filter["status"]= req.query.status == "All" ? {$ne: "created"} : req.query.status == "Open" ? "approved" : req.query.status.toLowerCase()
@@ -44,23 +44,18 @@ const issuesList= async (req, res)=> {
         if(req.query.lat && req.query.lng){
             const maxDistance = 5000;
             filter['location']= { 
-                $near: {
-                    $geometry: {
+                $geoNear: {
+                    $near: {
                         type: "Point" ,
                         coordinates: [req.query.lat*1, req.query.lng*1] 
                     },
-                    $maxDistance : maxDistance
+                    $maxDistance : maxDistance,
+                    spherical: true
                 }
             }
         }
-        let documents= await getIssues(filter)
-        for(let i= 0; i< documents.length; i++) {
-            let comments= await getCommentsCount(documents[i]._id)
-            let flags= await getFlags(documents[i]._id, true)
-            let views= await getViewsCount(documents[i]._id)
-            issuesData.push({...documents[i]._doc, commentsCount: comments, flags: flags, viewsCount: views})
-        }
-        res.status(200).json({sucess: true, message: "List of issues", data: issuesData})
+        let documents= await getIssues(filter, page)
+        res.status(200).json({sucess: true, message: "List of issues", data: documents})
     }catch(err) {
         console.log(err)
         res.status(400).json({sucess: false, message: err.message})
@@ -87,7 +82,8 @@ const createissue= async (req, res)=> {
             imgs.push(name)
             await saveImage(data, imgPath)
         }
-        let isuObj= {hashId:uniqid.process("#"), title: req.body.title, description: req.body.description, images: imgs, address: address, location: { type: 'Point', coordinates:[address.lat_lng.lat, address.lat_lng.lng]}, categoryId: req.body.category, otherCategory: req.body.other, isSwatchBharat: req.body.isSwathyaBharat, userId: req.user.userId}
+        let isuObj= {hashId:uniqid.process("#"), title: req.body.title, description: req.body.description, images: imgs, address: address, location: { type: 'Point', coordinates:[address.lat_lng.lat, address.lat_lng.lng]}, otherCategory: req.body.other, isSwatchBharat: req.body.isSwathyaBharat, userId: req.user.userId}
+        if(req.body.category) {isuObj['categoryId']= req.body.category}
         let issue= await saveIssue(isuObj)
         res.status(200).json({sucess: true, message: "Issue created successfully", data: issue})
     }catch(err) {
