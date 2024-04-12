@@ -30,6 +30,19 @@ const signup= async (req, res)=> {
     }
 }
 
+const findUserByMobile= async (req, res)=> {
+    try {
+        let user= await userLogin(req.body.loginId)
+        if(user) {
+            res.status(200).json({success: true, message: `User existed with the given number`, data: {userId: user._id}})
+        } else {
+            res.status(400).json({success: false, message: `User not found`})
+        }
+    } catch(err) {
+        res.status(400).json({success: false, message: err.message})
+    }
+}
+
 const login= async (req, res)=> {
     try{
         let user= await userLogin(req.body.loginId)
@@ -124,8 +137,11 @@ const updateUser= async (req, res)=> {
                 let proImg= await saveImage(req.body.identity_proof);
                 userObj['identity_proof'] = proImg
             }
+            if(req.body.password) {
+                userObj['password'] = req.body.password
+            }
             let updatedUser= await updateUserDetails(userObj, user._id)
-            res.status(200).json({success: true, message: "profile pic updated successfully", data: updatedUser})
+            res.status(200).json({success: true, message: "profile details updated successfully", data: updatedUser})
         } else{
             res.status(400).json({success: false, message: "Unable to find user details"})
         }
@@ -157,5 +173,6 @@ module.exports= {
     verifyOTP: verifyOTP,
     getuser: getuser,
     updateUser: updateUser,
-    getusers: getusers
+    getusers: getusers,
+    findUserByMobile: findUserByMobile
 }

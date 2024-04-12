@@ -36,26 +36,15 @@ const getHotIssues= async (req, res)=> {
 
 const issuesList= async (req, res)=> {
     try{
-        let page= req.params.page ? req.params.page : 1
-        let filter={}
-        if(req.query.startDate && req.query.endDate) filter["created_at"]= {$gte: new Date(req.query.startDate), $lte: new Date(req.query.endDate)}
-        if(req.query.status) filter["status"]= req.query.status == "All" ? {$ne: "created"} : req.query.status == "Open" ? "approved" : req.query.status.toLowerCase()
-        if(req.query.status) filter["isHotIssue"]= false
-        if(req.query.lat && req.query.lng){
-            const maxDistance = 5000;
-            filter['location']= { 
-                $geoNear: {
-                    $near: {
-                        type: "Point" ,
-                        coordinates: [req.query.lat*1, req.query.lng*1] 
-                    },
-                    $maxDistance : maxDistance,
-                    spherical: true
-                }
-            }
-        }
-        let documents= await getIssues(filter, page)
-        res.status(200).json({sucess: true, message: "List of issues", data: documents})
+        const location = req.query.lat && req.query.lng ? [req.query.lat*1, req.query.lng*1] : null; // Example coordinates for New York City
+        const radius = 10000; // 1000 meters
+        const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date('2023-01-01')
+        const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+        const status = req.query.status == "All" ? {$ne: "created"} : req.query.status == "Open" ? "approved" : req.query.status.toLowerCase()
+        const page = req.query.currentPage ? req.query.currentPage : 1;
+        const limit = 10;
+        let documents= await getIssues(location, radius, startDate, endDate, status, page, limit)
+        res.status(200).json({sucess: true, message: "List of issues", data: documents[0]})
     }catch(err) {
         console.log(err)
         res.status(400).json({sucess: false, message: err.message})
@@ -94,8 +83,13 @@ const createissue= async (req, res)=> {
 
 const getUserIssues= async (req, res)=> {
     try{
-        let documents= await getIssues({userId: req.params.userId})
-        res.status(200).json({sucess: false, message: "user issues", data: documents})
+        const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date('2023-01-01')
+        const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+        const status = {$ne: "created"}
+        const page = req.query.currentPage ? req.query.currentPage : 1;
+        const limit = 100;
+        let documents= await getIssues(null, null, startDate, endDate, status, page, limit, req.params.userId)
+        res.status(200).json({sucess: true, message: "user issues", data: documents[0]})
     } catch(err){
         res.status(400).json({sucess: false, message: err.message})
     }

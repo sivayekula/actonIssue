@@ -70,4 +70,18 @@ UserSchema.pre('save', function(next) {
   });
 });
 
+// Middleware to hash the password before updating
+UserSchema.pre('findOneAndUpdate', async function(next) {
+  if (!this._update.password) {
+      return next();
+  }
+  try {
+      const hashedPassword = await bcrypt.hash(this._update.password, 10);
+      this._update.password = hashedPassword;
+      next();
+  } catch (error) {
+      next(error);
+  }
+});
+
 module.exports= mongoose.model("user", UserSchema);
