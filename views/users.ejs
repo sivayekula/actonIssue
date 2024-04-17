@@ -29,7 +29,7 @@
                     let user;
                     for(let i= 0; i< userObj.data.length; i++) {
                         let cls= userObj.data[i].status == "active" ? "btn btn-outline-danger btn-rounded" : "btn btn-outline-success btn-rounded"
-                        user += '<tr><td>'+userObj.data[i].name+'</td><td>'+userObj.data[i].email+'</td><td>'+userObj.data[i].mobile+'</td><td>'+userObj.data[i].address?.label+'</td><td>'+userObj.data[i].status+'</td><td class="text-end"><a href="#" class="'+cls+'" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick="inactive(`'+userObj.data[i]._id+'`, `'+userObj.data[i].status+'`)"><i class="fas fa-trash"></i></a></td></tr>'
+                        user += '<tr><td>'+userObj.data[i].name+'</td><td>'+userObj.data[i].email+'</td><td>'+userObj.data[i].mobile+'</td><td>'+(userObj.data[i].address ? userObj.data[i].address.label.substring(0, 20) + "..." : "") +'</td><td>'+userObj.data[i].status+'</td><td class="text-end"><a href="#" class="'+cls+'" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick="inactive(`'+userObj.data[i]._id+'`, `'+userObj.data[i].status+'`)"><i class="fas fa-trash"></i></a></td></tr>'
                     }
                     user ? $("tbody").empty().append(user) : "";
                     $("#dataTables-example").DataTable().draw();

@@ -23,6 +23,8 @@ $(document).ready(function () {
               $('#exampleModal').modal('hide');
               $('#exampleModal1').modal('hide');
               $('#exampleModal2').modal('hide');
+              $('#exampleModal3').modal('hide');
+              window.location.reload()
             },
             eror: function(err) {
               '<div class="alert alert-danger" role="alert">'+err.message +'</div>'

@@ -3,9 +3,9 @@ const router= express.Router();
 const { loginSchema, signupSchema, verifyOTPSchema, resendOTPSchema } = require('../middlewares/userRequestValidator');
 const { login, signup, getuser, updateUser, getusers } = require('../controllers/users');
 const {sessionChecker}= require("../middlewares/tokenValidator")
-const {issuesList, updateIssue}= require("../controllers/issues")
-const {getIssue}= require("../models/issues");
-const {getComments, deleteComment}= require("../models/comments")
+const {issuesList, updateIssue, getAllIssues}= require("../controllers/issues")
+const {getIssue, getDashboardData}= require("../models/issues");
+const {getComments, deleteComment, saveComment}= require("../models/comments")
 const { getCategory, createCategory, categories, updateCategory } = require('../controllers/category');
 
 
@@ -18,8 +18,9 @@ router.get("/", (req, res)=> {
 })
 
 router.post("/login", loginSchema, login)
-router.get("/dashboard", sessionChecker, (req, res)=> {
-    res.render('dashboard');
+router.get("/dashboard", sessionChecker, async (req, res)=> {
+    let response = await getDashboardData()
+    res.render('dashboard', {response});
 })
 router.get("/users", sessionChecker, (req, res)=> {
     res.render("users")
@@ -38,8 +39,19 @@ router.post("/deleteComment", sessionChecker, async(req, res)=> {
     let sts= await deleteComment(req.body.commentId)
     res.status(200).json({status: 200, message: "comment deleted successfully", data: sts})
 })
+router.post("/replyComment", sessionChecker, async(req, res)=> {
+    let comntObj= {comment: req.body.reply, userId: req.user.userId, issueId: req.body.issuId}
+    if(req.body.replyId) comntObj["commentId"]= req.body.replyId;
+    let sts= await saveComment(comntObj)
+    res.status(200).json({status: 200, message: "comment deleted successfully", data: sts})
+})
+router.post("/createComment", sessionChecker, async(req, res)=> {
+    let comntObj= {comment: req.body.comment, userId: req.user.userId, issueId: req.body.issId}
+    let sts= await saveComment(comntObj)
+    res.status(200).json({status: 200, message: "comment deleted successfully", data: sts})
+})
 router.post("/updateIssueStatus", sessionChecker, updateIssue)
-router.get("/getIssues", sessionChecker, issuesList)
+router.get("/getIssues", sessionChecker, getAllIssues)
 router.get("/categories", sessionChecker, (req, res)=> {
     res.render('categories');
 })

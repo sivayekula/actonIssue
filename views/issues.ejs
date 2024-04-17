@@ -32,7 +32,7 @@
                     issues= doc.data
                     let isu;
                     for(let i= 0; i< isuObj.length; i++) {
-                        isu += '<tr><td>'+isuObj[i].userId.name+'</td><td>'+isuObj[i].title+'</td><td>'+isuObj[i].description+'</td><td>'+isuObj[i].categoryId?.name+'</td><td>'+isuObj[i].commentsCount+'</td><td>'+isuObj[i].status+'</td><td><a href="/admin/issueDetails/'+isuObj[i]._id+'" class="btn btn-outline-info btn-rounded"><i class="fas fa-eye"></i></a></td></tr>'
+                        isu += '<tr><td>'+isuObj[i].userId.name+'</td><td>'+isuObj[i].title.substring(0, 15) + '...'+'</td><td>'+isuObj[i].description.substring(0, 15) + '...'+'</td><td>'+isuObj[i].categoryId?.name+'</td><td>'+isuObj[i].status+'</td><td><a href="/admin/issueDetails/'+isuObj[i]._id+'" class="btn btn-outline-info btn-rounded"><i class="fas fa-eye"></i></a></td></tr>'
                     }
                     isu ? $("tbody").empty().append(isu) : "";
                     $("#dataTables-example").DataTable().draw();
@@ -70,11 +70,10 @@
                                 <table class="table table-striped" id="dataTables-example" width="100%">
                                     <thead>
                                         <tr>
-                                            <th>Raised By</th>
+                                            <th>Created By</th>
                                             <th>Issue Title</th>
                                             <th>Issue Description</th>
                                             <th>Issue Category</th>
-                                            <th>Comments</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>

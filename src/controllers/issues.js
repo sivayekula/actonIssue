@@ -1,7 +1,7 @@
 "use strict";
 const fs= require("fs")
 const path= require("path")
-const { getIssues, saveIssue, getIssue, updateIssueDetails, gethotIssues } = require("../models/issues")
+const { getIssues, saveIssue, getIssue, updateIssueDetails, gethotIssues, getMyIssue } = require("../models/issues")
 const uniqid= require("uniqid");
 const { getComments, getCommentsCount } = require("../models/comments");
 const { getFlags, getFlagsCount, getViewsCount } = require("../models/likes");
@@ -95,6 +95,15 @@ const getUserIssues= async (req, res)=> {
     }
 }
 
+const getAllIssues= async (req, res)=> {
+    try{
+        let documents= await getMyIssue()
+        res.status(200).json({sucess: true, message: "user issues", data: documents})
+    } catch(err){
+        res.status(400).json({sucess: false, message: err.message})
+    }
+}
+
 const updateIssue= async (req, res)=> {
     try {
         let issue= await getIssue(req.body.issueId);
@@ -129,5 +138,6 @@ module.exports = {
     createissue: createissue,
     issuesList: issuesList,
     updateIssue: updateIssue,
-    getHotIssues: getHotIssues
+    getHotIssues: getHotIssues,
+    getAllIssues: getAllIssues
 }

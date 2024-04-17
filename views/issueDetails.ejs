@@ -36,7 +36,14 @@
            }
 
            function deleteComment(id) {
-            $("#commentId").val(id)
+                $("#commentId").val(id)
+           }
+           function replyComment(id, issueId) {
+                $("#replyId").val(id)
+                $("#issuId").val(issueId)
+           }
+           function saveComment(issueId){
+            $("#issId").val(issueId)
            }
         </script>
     </head>
@@ -76,7 +83,11 @@
                                         <table class="table">
                                             <thead>
                                                 <tr>
-                                                    <th>Comments</th>
+                                                    <th>Comments 
+                                                        <a class="btn btn-outline-success btn-rounded" data-bs-toggle="modal" data-bs-target="#exampleModal3" onClick="saveComment(`<%= issue._id %>`)"><i class="fa fa-plus-circle"></i></a>
+                                                    </th>
+                                                    <th>Commented By</th>
+                                                    <th>replied on</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -84,7 +95,12 @@
                                                 <% for(let i= 0; i< comments.length; i++){ %>
                                                 <tr>
                                                     <td><%= comments[i].comment %></td>
-                                                    <td><a class="btn btn-outline-danger btn-rounded" data-bs-toggle="modal" data-bs-target="#exampleModal1" onClick="deleteComment(`<%= comments[i]._id %>`)"><i class="fas fa-trash"></i></a></td>
+                                                    <td><%= comments[i].userId.name %></td>
+                                                    <td><% if(comments[i].commentId) {%> <%= comments[i].commentId?.comment %>(<%= comments[i].commentId?.userId.name %>) <%}%></td>
+                                                    <td>
+                                                        <a class="btn btn-outline-success btn-rounded" data-bs-toggle="modal" data-bs-target="#exampleModal2" onClick="replyComment(`<%= comments[i]._id %>`, `<%= issue._id %>`)"><i class="fa fa-reply"></i></a>
+                                                        <a class="btn btn-outline-danger btn-rounded" data-bs-toggle="modal" data-bs-target="#exampleModal1" onClick="deleteComment(`<%= comments[i]._id %>`)"><i class="fa fa-trash"></i></a>
+                                                    </td>
                                                 </tr>
                                                 <% } %>
                                             </tbody>
@@ -135,17 +151,60 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Delete Issue</h5>
+                        <h5 class="modal-title">Delete comment</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form class="needs-validation" novalidate accept-charset="utf-8" action="/admin/deleteComment">
                         <div class="modal-body text-start">
-                           <input type="hidden" name="commentId" id="commentId">
-                           <div id="msg">Are you sure. Do you want delete the comment</div>
+                            <input type="hidden" name="commentId" id="commentId">
+                            <div id="msg">Are you sure. Do you want delete the comment</div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-primary">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="exampleModal2" role="dialog" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reply Comment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form class="needs-validation" novalidate accept-charset="utf-8" action="/admin/replyComment">
+                        <div class="modal-body text-start">
+                            <input type="hidden" name="issuId" id="issuId" >
+                            <input type="hidden" name="replyId" id="replyId">
+                            <textarea id="reply" name="reply" rows="4" cols="50" required></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Reply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="exampleModal3" role="dialog" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Comment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form class="needs-validation" novalidate accept-charset="utf-8" action="/admin/createComment">
+                        <div class="modal-body text-start">
+                            <input type="hidden" name="issId" id="issId">
+                            <textarea id="comment" name="comment" rows="4" cols="50" required></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add</button>
                         </div>
                     </form>
                 </div>

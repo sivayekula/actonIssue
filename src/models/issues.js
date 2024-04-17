@@ -1,6 +1,6 @@
 const Issue= require("../schemas/issue");
 const config= require("../config/config");
-const { default: mongoose } = require("mongoose");
+const user = require("../schemas/user");
 
 
 const getIssues= async (location, radius, startDate, endDate, status, page, limit, userId=null)=> {
@@ -25,6 +25,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
                     isHotIssue: false
                 }
             },
+            { $sort: { created_at: 1 } },
             {
                 $lookup: {
                     from: 'comments',
@@ -33,7 +34,6 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
                     as: 'comments'
                 }
             },
-            { $sort: { createdAt: -1 } },
             {
                 $addFields: {
                     commentsCount: { $size: '$comments' }
@@ -104,7 +104,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
             {
                 "$group": {
                     "_id": "$_id",
-                    "document": { "$first": "$$ROOT" }, // Assuming you have other fields to retain
+                    "document": { "$first": "$$ROOT" },
                     "flags": { "$push": "$flags" }
                 }
             },
@@ -144,6 +144,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
             {
                 $match: qry
             },
+            { $sort: { created_at: 1 } },
             {
                 $lookup: {
                     from: 'comments',
@@ -152,7 +153,6 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
                     as: 'comments'
                 }
             },
-            { $sort: { createdAt: -1 } },
             {
                 $addFields: {
                     commentsCount: { $size: '$comments' }
@@ -271,7 +271,7 @@ const getMyIssues= async (userId)=> {
 
 const getIssue= async (isuId)=> {
     try{
-        let issue= await Issue.findOne({$or:[{_id: isuId}, {hashId: isuId}]}).populate("categoryId").populate("userId", "name")
+        let issue= await Issue.findOne({$or:[{_id: isuId}, {hashId: isuId}]}).sort({created_at: -1}).populate("categoryId").populate("userId", "name")
         return issue
     }catch(err) {
         throw err
@@ -296,11 +296,24 @@ const updateIssueDetails= async (id, issueObj)=> {
     }
 }
 
+const getDashboardData= async()=> {
+    try{
+        createdIssuesCount= await Issue.count({status : 'created'})
+        activeIssuesCount= await Issue.count({status : 'approved', isHotIssue: false})
+        resolvedIssuesCount= await Issue.count({status : 'resolved'})
+        usersCount= await user.count({status: 'active'})
+        return {createdIssuesCount, activeIssuesCount, resolvedIssuesCount, usersCount}
+    } catch(err){
+        throw err;
+    }
+}
+
 module.exports= {
     getIssues: getIssues,
     saveIssue: saveIssue,
     getIssue: getIssue,
     updateIssueDetails: updateIssueDetails,
     gethotIssues: getHotIssues,
-    getMyIssue: getMyIssues
+    getMyIssue: getMyIssues,
+    getDashboardData: getDashboardData
 }
