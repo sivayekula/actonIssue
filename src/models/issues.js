@@ -25,7 +25,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
                     isHotIssue: false
                 }
             },
-            { $sort: { created_at: 1 } },
+            { $sort: { created_at: -1 } },
             {
                 $lookup: {
                     from: 'comments',
@@ -116,7 +116,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
             {
                 $facet: {
                     metadata: [{ $count: 'totalIssues' }, { $addFields: { page: page, limit: limit } }],
-                    data: [{ $skip: (page - 1) * limit }, { $limit: limit }]
+                    data: [{ $sort: { created_at: -1 } }, { $skip: (page - 1) * limit }, { $limit: limit }]
                 }
             }
         ];
@@ -144,7 +144,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
             {
                 $match: qry
             },
-            { $sort: { created_at: 1 } },
+            { $sort: { created_at: -1 } },
             {
                 $lookup: {
                     from: 'comments',
@@ -235,7 +235,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
             {
                 $facet: {
                     metadata: [{ $count: 'totalIssues' }, { $addFields: { page: page, limit: limit } }],
-                    data: [{ $skip: (page - 1) * limit }, { $limit: limit }]
+                    data: [{ $sort: { created_at: -1 } }, { $skip: (page - 1) * limit }, { $limit: limit }]
                 }
             }
         ];
