@@ -10,9 +10,10 @@ const saveCategory= async (catObj)=>{
     }
 }
 
-const getCategories= async ()=>{
+const getCategories= async (name= null)=>{
+    let qry = name ? {name: {$in: name}} : {}
     try{
-        let categories= await Category.find();
+        let categories= await Category.find(qry);
         return categories
     }catch(err) {
         throw err

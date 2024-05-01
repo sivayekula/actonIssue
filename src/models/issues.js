@@ -3,9 +3,21 @@ const config= require("../config/config");
 const user = require("../schemas/user");
 
 
-const getIssues= async (location, radius, startDate, endDate, status, page, limit, userId=null)=> {
-    let pipeline = {}
+const getIssues= async (location, radius, startDate, endDate, status, page, limit, title, userId=null)=> {
+    let tqry= null
+    if(title) {
+        let categories = await getCategories(title);
+        let categoryId = categories.map(category=> category._id);
+        tqry= {$or:[{title: title}, {categoryId: {$in : categoryId}}]}
+    }
+    let pipeline = [];
     if (location) {
+        let qry = {
+            created_at: { $gte: startDate, $lte: endDate },
+            status: status,
+            isHotIssue: false
+        }
+        if(tqry) qry= {...qry, ...tqry}
         pipeline = [
             {
                 $geoNear: {
@@ -19,11 +31,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
                 }
             },
             {
-                $match: {
-                    created_at: { $gte: startDate, $lte: endDate },
-                    status: status,
-                    isHotIssue: false
-                }
+                $match: qry
             },
             { $sort: { created_at: -1 } },
             {
@@ -139,6 +147,7 @@ const getIssues= async (location, radius, startDate, endDate, status, page, limi
                 status: status,
                 isHotIssue: false
             }
+            if(tqry) qry= {...qry, ...tqry} 
         }
         pipeline = [
             {

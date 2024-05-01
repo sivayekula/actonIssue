@@ -43,7 +43,8 @@ const issuesList= async (req, res)=> {
         const status = req.query.status == "All" ? {$ne: "created"} : req.query.status == "Open" ? "approved" : req.query.status.toLowerCase()
         const page = req.query.currentPage ? req.query.currentPage : 1;
         const limit = 10;
-        let documents= await getIssues(location, radius, startDate, endDate, status, page, limit)
+        const title = req.query.title ? req.query.title : null
+        let documents= await getIssues(location, radius, startDate, endDate, status, page, limit, title)
         res.status(200).json({sucess: true, message: "List of issues", data: documents[0]})
     }catch(err) {
         console.log(err)
