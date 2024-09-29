@@ -47,7 +47,7 @@ app.use(function(req, res, next) {
     }
     next();
 });
-app.set('views', path.join(__dirname, 'views'));
+// app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static("assets"))
 app.use(express.static(__dirname + '/uploads'))
